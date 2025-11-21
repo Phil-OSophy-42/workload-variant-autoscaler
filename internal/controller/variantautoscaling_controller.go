@@ -25,6 +25,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-playground/validator/v10"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
@@ -132,6 +134,13 @@ func (r *VariantAutoscalingReconciler) Reconcile(ctx context.Context, req ctrl.R
 
 	// WVA operates in unlimited mode - no cluster inventory collection needed
 	systemData := utils.CreateSystemData(acceleratorCm, serviceClassCm)
+
+	validate := validator.New()
+	err = validate.Struct(systemData)
+	if err != nil {
+		logger.Log.Error(err, "system configuration validation failed")
+		return ctrl.Result{}, err
+	}
 
 	updateList, vaMap, allAnalyzerResponses, err := r.prepareVariantAutoscalings(ctx, activeVAs, acceleratorCm, serviceClassCm, systemData)
 	if err != nil {

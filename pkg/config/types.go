@@ -10,11 +10,11 @@ type SystemData struct {
 // Specifications for system data
 type SystemSpec struct {
 	// static data
-	Accelerators   AcceleratorData  `json:"acceleratorData"`  // accelerator data
-	Models         ModelData        `json:"modelData"`        // model data
-	ServiceClasses ServiceClassData `json:"serviceClassData"` // service class data
-	Servers        ServerData       `json:"serverData"`       // server data
-	Optimizer      OptimizerData    `json:"optimizerData"`    // optimizer data
+	Accelerators   AcceleratorData  `json:"acceleratorData" validate:"required"`  // accelerator data
+	Models         ModelData        `json:"modelData"`                            // model data
+	ServiceClasses ServiceClassData `json:"serviceClassData" validate:"required"` // service class data
+	Servers        ServerData       `json:"serverData"`                           // server data
+	Optimizer      OptimizerData    `json:"optimizerData"`                        // optimizer data
 
 	// dynamic data
 	Capacity CapacityData `json:"capacityData"` // data about accelerator type availability
@@ -22,26 +22,26 @@ type SystemSpec struct {
 
 // Data related to an Accelerator
 type AcceleratorData struct {
-	Spec []AcceleratorSpec `json:"accelerators"` // accelerator specs
+	Spec []AcceleratorSpec `json:"accelerators" validate:"dive"` // accelerator specs
 }
 
 // Specifications for accelerator data
 type AcceleratorSpec struct {
-	Name         string    `json:"name"`         // name of accelerator
-	Type         string    `json:"type"`         // name of accelerator type (e.g. A100)
-	Multiplicity int       `json:"multiplicity"` // number of cards of type for this accelerator
-	MemSize      int       `json:"memSize"`      // GB
-	MemBW        int       `json:"memBW"`        // GB/sec
-	Power        PowerSpec `json:"power"`        // power consumption specs
-	Cost         float32   `json:"cost"`         // cents/hr
+	Name         string    `json:"name" validate:"required"`      // name of accelerator
+	Type         string    `json:"type" validate:"required"`      // name of accelerator type (e.g. A100)
+	Multiplicity int       `json:"multiplicity" validate:"gte=1"` // number of cards of type for this accelerator
+	MemSize      int       `json:"memSize" validate:"gte=0"`      // GB
+	MemBW        int       `json:"memBW" validate:"gte=0"`        // GB/sec
+	Power        PowerSpec `json:"power"`                         // power consumption specs
+	Cost         float32   `json:"cost" validate:"gte=0"`         // cents/hr
 }
 
 // Specifications for Accelerator power consumption data (Watts)
 type PowerSpec struct {
-	Idle     int     `json:"idle"`     // idle power
-	Full     int     `json:"full"`     // full utilization power
-	MidPower int     `json:"midPower"` // power at inflection point
-	MidUtil  float32 `json:"midUtil"`  // utilization at inflection point
+	Idle     int     `json:"idle" validate:"gte=0"`     // idle power
+	Full     int     `json:"full" validate:"gte=0"`     // full utilization power
+	MidPower int     `json:"midPower" validate:"gte=0"` // power at inflection point
+	MidUtil  float32 `json:"midUtil" validate:"gte=0"`  // utilization at inflection point
 }
 
 // Data about accelerator type availability
@@ -85,22 +85,22 @@ type PrefillParms struct {
 
 // Data related to a service class SLOs
 type ServiceClassData struct {
-	Spec []ServiceClassSpec `json:"serviceClasses"`
+	Spec []ServiceClassSpec `json:"serviceClasses" validate:"dive"`
 }
 
 // Specification of a service class
 type ServiceClassSpec struct {
-	Name         string        `json:"name"`         // service class name
-	Priority     int           `json:"priority"`     // [1,100] priority (lower value is higher priority)
-	ModelTargets []ModelTarget `json:"modelTargets"` // target SLOs for models
+	Name         string        `json:"name" validate:"required"`          // service class name
+	Priority     int           `json:"priority" validate:"gte=1,lte=100"` // [1,100] priority (lower value is higher priority)
+	ModelTargets []ModelTarget `json:"modelTargets" validate:"dive"`      // target SLOs for models
 }
 
 // Specification of SLO targets for a model
 type ModelTarget struct {
-	Model    string  `json:"model"`    // model name
-	SLO_ITL  float32 `json:"slo-itl"`  // inter-token latency (msec)
-	SLO_TTFT float32 `json:"slo-ttft"` // time to first token, including queueing (msec)
-	SLO_TPS  float32 `json:"slo-tps"`  // throughput (tokens/sec)
+	Model    string  `json:"model" validate:"required"` // model name
+	SLO_ITL  float32 `json:"slo-itl" validate:"gte=0"`  // inter-token latency (msec)
+	SLO_TTFT float32 `json:"slo-ttft" validate:"gte=0"` // time to first token, including queueing (msec)
+	SLO_TPS  float32 `json:"slo-tps" validate:"gte=0"`  // throughput (tokens/sec)
 }
 
 // Data related to a Server

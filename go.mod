@@ -15,7 +15,13 @@ require (
 	sigs.k8s.io/controller-runtime v0.20.4
 )
 
-require github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
+require (
+	github.com/go-playground/locales v0.13.0 // indirect
+	github.com/go-playground/universal-translator v0.17.0 // indirect
+	github.com/go-playground/validator/v10 v10.0.0 // indirect
+	github.com/leodido/go-urn v1.2.0 // indirect
+	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
+)
 
 require (
 	cel.dev/expr v0.18.0 // indirect

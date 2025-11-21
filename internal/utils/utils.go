@@ -128,19 +128,25 @@ func CreateSystemData(
 			logger.Log.Warn("failed to parse accelerator cost in configmap, skipping accelerator", "name", key)
 			continue
 		}
+		var multiplicity int64
+		if mul, ok := val["multiplicity"]; ok {
+			multiplicity, err = strconv.ParseInt(mul, 10, 64)
+			if err != nil {
+				logger.Log.Warn("failed to parse accelerator multiplicity in configmap, skipping accelerator", "name", key)
+				continue
+			}
+		}
 		acceleratorData = append(acceleratorData, infernoConfig.AcceleratorSpec{
 			Name:         key,
 			Type:         val["device"],
-			Multiplicity: 1,                         // TODO: multiplicity should be in the configured accelerator spec
+			Multiplicity: int(multiplicity),         // TODO: multiplicity should be in the configured accelerator spec
 			Power:        infernoConfig.PowerSpec{}, // Not currently used
 			Cost:         float32(cost),
 		})
 	}
 	systemData.Spec.Accelerators.Spec = acceleratorData
-
 	// Capacity data is not used in unlimited mode - initialize empty for future limited mode work
 	systemData.Spec.Capacity.Count = []infernoConfig.AcceleratorCount{}
-
 	// get service class data
 	serviceClassData := []infernoConfig.ServiceClassSpec{}
 	for key, val := range serviceClassCm {
@@ -177,7 +183,6 @@ func CreateSystemData(
 
 	// initialize dynamic server data
 	systemData.Spec.Servers.Spec = []infernoConfig.ServerSpec{}
-
 	return systemData
 }
 
@@ -372,7 +377,7 @@ func FindModelSLO(cmData map[string]string, targetModel string) (*interfaces.Ser
 		if err := yaml.Unmarshal([]byte(val), &sc); err != nil {
 			return nil, "", fmt.Errorf("failed to parse %s: %w", key, err)
 		}
-
+		// 这里为啥是找到了就返回，而不是根据优先级来排序呢？
 		for _, entry := range sc.Data {
 			if entry.Model == targetModel {
 				return &entry, sc.Name, nil
