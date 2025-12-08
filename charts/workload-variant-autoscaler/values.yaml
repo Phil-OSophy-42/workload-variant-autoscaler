@@ -2,7 +2,7 @@ wva:
   enabled: true
 
   image:
-    repository: ghcr.io/llm-d/workload-variant-autoscaler
+    repository: ghcr.io/llm-d-incubation/workload-variant-autoscaler
     tag: v0.4.1
   imagePullPolicy: Always
 
@@ -33,7 +33,7 @@ wva:
   experimentalHybridOptimization: off  # Enable experimental hybrid optimization (default: off)
   scaleToZero: false  # Enable scaling variants to zero replicas (default: false)
 
-  # Capacity-based scaling configuration
+  # Saturation-based scaling configuration
   # These thresholds determine when replicas are saturated and when to scale up
   capacityScaling:
     # Global defaults applied to all variants unless overridden
